@@ -1,18 +1,18 @@
 #!/usr/bin/python3
-"""Exports to-do list information for a given employee ID to CSV format."""
-import csv
+"""Export data into the CSV format"""
+
 import requests
 import sys
+import csv
 
-if __name__ == "__main__":
-    user_id = sys.argv[1]
-    url = "https://jsonplaceholder.typicode.com/"
-    user = requests.get(url + "users/{}".format(user_id)).json()
-    username = user.get("username")
-    todos = requests.get(url + "todos", params={"userId": user_id}).json()
+if __name__ == '__main__':
+    endpoint = "https://jsonplaceholder.typicode.com/"
+    userId = sys.argv[1]
+    user = requests.get(endpoint + 'users/{}'.format(userId)).json()
+    todo = requests.get(endpoint + 'todos?userId={}'.format(userId)).json()
 
-    with open("{}.csv".format(user_id), "w", newline="") as csvfile:
-        writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-        [writer.writerow(
-            [user_id, username, t.get("completed"), t.get("title")]
-         ) for t in todos]
+    with open("{}.csv".format(userId), 'w', newline='') as csvfile:
+        write_to_file = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
+        for task in todo:
+            write_to_file.writerow([int(userId), user.get(
+                'username'), task.get('completed'), task.get('title')])
