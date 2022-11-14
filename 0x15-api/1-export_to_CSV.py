@@ -1,18 +1,28 @@
 #!/usr/bin/python3
-"""Export data into the CSV format"""
+"""This module contains a python script that interacts with the REST api.
+The script exports a given employee data into a CSV file format"""
+from requests import get
+from sys import argv
+from csv import writer, QUOTE_ALL
 
-import requests
-import sys
-import csv
 
-if __name__ == '__main__':
-    endpoint = "https://jsonplaceholder.typicode.com/"
-    userId = sys.argv[1]
-    user = requests.get(endpoint + 'users/{}'.format(userId)).json()
-    todo = requests.get(endpoint + 'todos?userId={}'.format(userId)).json()
+if __name__ == "__main__":
+    user_info = get('https://jsonplaceholder.typicode.com/users/{}'.
+                    format(argv[1])).json()
+    user_todos = get('https://jsonplaceholder.typicode.com/todos/',
+                     params={"userId": argv[1]}).json()
 
-    with open("{}.csv".format(userId), 'w', newline='') as csvfile:
-        write_to_file = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-        for task in todo:
-            write_to_file.writerow([int(userId), user.get(
-                'username'), task.get('completed'), task.get('title')])
+    USER_ID = str(user_info.get('id'))
+    USERNAME = user_info.get('username')
+
+    for task in user_todos:
+        TASK_COMPLETED_STATUS = task.get('completed')
+        TASK_TITLE = task.get('title')
+
+        info_list = [USER_ID, USERNAME, TASK_COMPLETED_STATUS,
+                     TASK_TITLE]
+        file_name = USER_ID + '.csv'
+
+        with open(file_name, "a") as f:
+            w = writer(f, quoting=QUOTE_ALL)
+            w.writerow(info_list)
